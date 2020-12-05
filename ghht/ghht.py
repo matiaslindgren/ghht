@@ -66,7 +66,7 @@ def squares2commitdates(start_date, all_squares):
     for (width, height), char_squares in all_squares:
         for squares in char_squares:
             for x, y in squares:
-                #TODO height is wrong
+                #TODO height is wrong, it should be the max height of all used characters
                 x, y = int(x) + dx, -int(y) + height
                 yield (x, y), start_date + point2timedelta(x, y)
         dx += width
@@ -106,7 +106,7 @@ def commit(date, sink_repo, msg):
 
 def commit_year(year, sink_repo):
     start = datetime(year=year, month=1, day=1)
-    end = datetime(year=year, month=12, day=31)
+    end = datetime(year=year+1, month=1, day=1)
     i = 1
     while start < end:
         commit(start, sink_repo, "bg-{:03d}".format(i))
