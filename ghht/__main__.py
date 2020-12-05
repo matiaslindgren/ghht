@@ -16,6 +16,7 @@ def _main(sink_repo, text, start_date, font_file, background, intensity, skip_li
     print("converting font file '{:s}' to '{:s}'".format(font_file, ttx_file))
     fontTools.ttx.main(["-o", ttx_file, font_file])
 
+    skip_dates = set()
     if skip_list:
         with open(skip_list) as f:
             skip_dates = set(parse_date(l.strip()) for l in f)
@@ -23,8 +24,14 @@ def _main(sink_repo, text, start_date, font_file, background, intensity, skip_li
         print("skiplist contained {} dates to skip".format(len(skip_dates)))
 
     print()
-    print("generating commits")
+    print("checking font has all chars in text")
     font = ghht.TTF(ttx_file)
+    for ch in text:
+        font.assert_has(ch)
+        print("'{}' ok".format(ch))
+
+    print()
+    print("generating commits")
     for (x, y), t in ghht.squares2commitdates(start_date, font.text2squares(text)):
         if t.date() in skip_dates:
             continue
@@ -50,7 +57,7 @@ def main():
         help="Date of first commit using format: yyyy-mm-dd")
     parser.add_argument("--font-file",
         type=str,
-        default="./fonts/tiny/tiny.ttf",
+        default=ghht.DEFAULT_FONT,
         help="TTX-convertible font file.")
     parser.add_argument("--background",
         action="store_true",

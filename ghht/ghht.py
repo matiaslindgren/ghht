@@ -47,13 +47,17 @@ class TTF:
             inner_points = grid_xy[p.contains_points(grid_xy + 0.5)]
             yield inner_points.round()
 
+    def assert_has(self, ch):
+        if ch != ' ':
+            assert self.glyph(ch) is not None, "font has no char '{}'".format(ch)
+
     def text2squares(self, text):
         for ch in text:
-            if ch == " ":
+            if ch == ' ':
                 # Whitespace has unit width, no height, and no pixels
                 yield (1, 0), []
                 continue
-            assert self.glyph(ch) is not None, "font has no char '{}'".format(ch)
+            self.assert_has(ch)
             yield self.charsize(ch), self.char2squares(ch)
 
 
@@ -62,6 +66,7 @@ def squares2commitdates(start_date, all_squares):
     for (width, height), char_squares in all_squares:
         for squares in char_squares:
             for x, y in squares:
+                #TODO height is wrong
                 x, y = int(x) + dx, -int(y) + height
                 yield (x, y), start_date + point2timedelta(x, y)
         dx += width
@@ -95,7 +100,7 @@ def commit(date, sink_repo, msg):
     with open(outpath, "a") as outf:
         print(unix, msg, file=outf)
 
-    run("git add {:s}".format(outpath))
+    run("git add {:s}".format(os.path.basename(outpath)))
     run("git commit --date={:d} --message={:s}".format(unix, msg))
 
 
