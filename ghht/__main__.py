@@ -1,9 +1,12 @@
-import argparse
-import datetime
-import string
-import tempfile
+from argparse import ArgumentParser
+from collections import defaultdict
+from datetime import datetime
+from tempfile import mkstemp
+import os.path
 
 import fontTools.ttx
+import numpy as np
+
 import ghht
 
 
@@ -11,8 +14,9 @@ def parse_date(d):
     return datetime.datetime.strptime(d, "%Y-%m-%d")
 
 
-def _main(sink_repo, text, start_date, font_file, background, intensity, skip_list):
-    ttx_file = tempfile.mkstemp()[1] + ".ttx"
+def _main(sink, text, start_year, font_file, background, intensity, skip_list, debug):
+    assert sink or debug, "sink or debug must be defined"
+    ttx_file = mkstemp()[1] + ".ttx"
     print("converting font file '{:s}' to '{:s}'".format(font_file, ttx_file))
     fontTools.ttx.main(["-o", ttx_file, font_file])
 
@@ -24,37 +28,57 @@ def _main(sink_repo, text, start_date, font_file, background, intensity, skip_li
         print("skiplist contained {} dates to skip".format(len(skip_dates)))
 
     print()
-    print("checking font has all chars in text")
+    print("checking font has all chars in text '{}'".format(text))
     font = ghht.TTF(ttx_file)
     for ch in text:
         font.assert_has(ch)
         print("'{}' ok".format(ch))
 
+    padding = ghht.Padding(top=1, right=1, left=1)
+
+    def xy_dates():
+        for (x, y), td in ghht.squares2commitdates(start_year, font.text2squares(text), padding):
+            if td.date() in skip_dates:
+                continue
+            yield (x, y), td
+
+    if debug:
+        print("debug mode, will not generate commits")
+        print("x y date")
+        years = defaultdict(lambda: np.zeros(ghht.HeatMapCanvas.shape))
+        for (x, y), td in xy_dates():
+            print(x, y, td.date())
+            years[td.date().year][y][x] += 1
+        ghht.plot_debug_heatmap(sorted(years.items(), reverse=True))
+        return
+
+    if not os.path.isdir(os.path.join(sink, ".git")):
+        print("'{}' does not have a .git directory, initializing repo".format(sink))
+        ghht.run("git init", sink)
+
     print()
     print("generating commits")
-    for (x, y), t in ghht.squares2commitdates(start_date, font.text2squares(text)):
-        if t.date() in skip_dates:
-            continue
+    for (x, y), t in xy_dates():
         for _ in range(intensity):
-            ghht.commit(t, sink_repo, "({},{})".format(x, y))
+            ghht.commit(t, sink, "({},{})".format(x, y))
 
     if background:
         print()
         print("generating commits for background")
-        ghht.commit_year(start_date.year, sink_repo)
+        ghht.commit_year(start_year, sink)
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("sink_repo",
-        type=str,
-        help="Path to a git repository to be used for generating commits.")
+    parser = ArgumentParser()
     parser.add_argument("text",
         type=str,
         help="ASCII text to render on commit heatmap.")
-    parser.add_argument("start_date",
-        type=parse_date,
-        help="Date of first commit using format: yyyy-mm-dd")
+    parser.add_argument("start_year",
+        type=int,
+        help="Year for first commit.")
+    parser.add_argument("--sink",
+        type=str,
+        help="Path to a git repository to be used for generating commits.")
     parser.add_argument("--font-file",
         type=str,
         default=ghht.DEFAULT_FONT,
@@ -63,6 +87,10 @@ def main():
         action="store_true",
         default=False,
         help="Generate a single commit on every day to paint a background.")
+    parser.add_argument("--debug",
+        action="store_true",
+        default=False,
+        help="Plot characters with matplotlib instead of generating commits.")
     parser.add_argument("--intensity",
         type=int,
         default=1,
