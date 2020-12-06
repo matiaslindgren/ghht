@@ -7,7 +7,7 @@ Pretend the green squares on GitHub heatmaps are pixels and "render" text on the
 ## Example
 
 ```
-python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.1.0.zip
+python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.2.0.zip
 
 mkdir commit-sink
 ghht "HELLO GITHUB" 2015 --sink ./commit-sink
