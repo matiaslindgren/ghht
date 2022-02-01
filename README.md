@@ -6,9 +6,18 @@ Pretend the green squares on GitHub heatmaps are pixels and "render" text on the
 
 ## Example
 
+### Without virtualenv
+
 ```
 python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.2.0.zip
+mkdir commit-sink
+python3 -m ghht "HELLO GITHUB" 2015 --sink ./commit-sink
+```
 
+### With virtualenv
+
+```
+pip install https://github.com/matiaslindgren/ghht/archive/v0.2.0.zip
 mkdir commit-sink
 ghht "HELLO GITHUB" 2015 --sink ./commit-sink
 ```
