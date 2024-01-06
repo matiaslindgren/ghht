@@ -2,15 +2,19 @@
 
 Pretend the green squares on GitHub heatmaps are pixels and "render" text on them with this useless Python package.
 
-![alt](./img/screenshot.png "GitHub contribution heatmap with a commit pattern that spells out 'HELLO GITHUB' in capital letters")
+![alt](./img/screenshot.png "GitHub contribution heatmap for year 2015 with a pattern that spells out 'HELLO GITHUB' in capital letters in green colour")
 
 ## Install
 
 ```bash
-python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.3.1.zip
+python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.3.2.zip
 ```
 
 ## Examples
+
+```bash
+python3 -m ghht -h
+```
 
 ### Git commits
 

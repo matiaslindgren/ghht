@@ -7,7 +7,6 @@ from .ghht import (
     Padding,
     TTF,
     commit,
-    commit_year,
     as_ascii_rows,
     sys_run,
     squares2commitdates,
