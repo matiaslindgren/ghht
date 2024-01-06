@@ -21,7 +21,7 @@ python3 -m ghht "HELLO GITHUB" 2015 --git-repo ./commit-sink
 ```
 Then create a repository on GitHub and push `commit-sink` there.
 
-### ASCII art
+### ASCII output
 
 Run with `--ascii` to print results to stdout instead of generating commits.
 ```bash
