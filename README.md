@@ -4,31 +4,45 @@ Pretend the green squares on GitHub heatmaps are pixels and "render" text on the
 
 ![alt](./img/screenshot.png "GitHub contribution heatmap with a commit pattern that spells out 'HELLO GITHUB' in capital letters")
 
-## Example
+## Install
 
-### Without virtualenv
-
+```bash
+python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.3.0.zip
 ```
-python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.2.0.zip
+
+## Examples
+
+### Git commits
+
+Create an empty directory and fill it with some commits:
+```bash
 mkdir commit-sink
-python3 -m ghht "HELLO GITHUB" 2015 --sink ./commit-sink
+python3 -m ghht "HELLO GITHUB" 2015 --git-repo ./commit-sink
 ```
+Then create a repository on GitHub and push `commit-sink` there.
 
-### With virtualenv
+### ASCII art
 
+Run with `--ascii` to print results to stdout instead of generating commits.
+```bash
+python3 -m ghht "python3 -c   'import this'" 1999 --ascii
 ```
-pip install https://github.com/matiaslindgren/ghht/archive/v0.2.0.zip
-mkdir commit-sink
-ghht "HELLO GITHUB" 2015 --sink ./commit-sink
+Output:
 ```
+1999
 
-Then push `commit-sink` to GitHub.
 
-## Debug
+          #  #           ##
+ ##  # # ### ##   #  ##   ##         ##
+ # # ###  #  # # # # # #   #    ### #
+ ##    #  #  # #  #  # # ##          ##
+ #   ##
+1998
 
-Run with `--debug` to plot the text on a `matplotlib` heatmap instead of generating commits.
+
+ # #                   #      #  #   #     #
+ #   ## #  ##   #  ## ###    ### ##     ## #
+   # # # # # # # # #   #      #  # # #  #
+   # # # # ##   #  #   #      #  # # # ##
+           #
 ```
-ghht "Hello GitHub! What's going on in 1996?" 1999 --debug
-```
-
-![alt](./img/debug_output.png "Text rendered in a debug plot with matplotlib that shows three heatmaps titled 1998, 1997, and 1996")

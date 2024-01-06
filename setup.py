@@ -2,11 +2,9 @@ from setuptools import setup
 
 setup(
     name="ghht",
-    version="0.2.0",
+    version="0.3.0",
     install_requires=[
         "fonttools ~= 4.18.0",
-        "matplotlib ~= 3.3.3",
-        "numpy ~= 1.19.4",
     ],
     packages=[
         "ghht",

@@ -1,12 +1,12 @@
-from argparse import ArgumentParser
-from collections import defaultdict
 from datetime import datetime
-from tempfile import mkstemp
-import os.path
+import argparse
+import contextlib
+import io
+import os
+import tempfile
+import sys
 
 import fontTools.ttx
-import numpy as np
-
 import ghht
 
 
@@ -14,92 +14,113 @@ def parse_date(d):
     return datetime.datetime.strptime(d, "%Y-%m-%d")
 
 
-def _main(sink, text, start_year, font_file, background, intensity, skip_list, debug):
-    assert sink or debug, "sink or debug must be defined"
-    ttx_file = mkstemp()[1] + ".ttx"
-    print("converting font file '{:s}' to '{:s}'".format(font_file, ttx_file))
-    fontTools.ttx.main(["-o", ttx_file, font_file])
+def run_ghht(
+    git_repo,
+    text,
+    start_year,
+    font_file,
+    background,
+    intensity,
+    ascii,
+    verbose,
+):
+    assert git_repo or ascii, "specify either --git-repo or --ascii"
+    ttx_file = tempfile.mkstemp()[1] + ".ttx"
+    if verbose:
+        print(f"converting font file '{font_file:s}' to '{ttx_file:s}'")
+    with contextlib.redirect_stdout(io.StringIO()) as f:
+        with contextlib.redirect_stderr(sys.stdout):
+            fontTools.ttx.main(["-o", ttx_file, font_file])
+            if verbose:
+                print(f.getvalue())
 
-    skip_dates = set()
-    if skip_list:
-        with open(skip_list) as f:
-            skip_dates = set(parse_date(l.strip()) for l in f)
-        print()
-        print("skiplist contained {} dates to skip".format(len(skip_dates)))
-
-    print()
-    print("checking font has all chars in text '{}'".format(text))
+    if verbose:
+        print(f"checking font has all chars in text '{text}'")
     font = ghht.TTF(ttx_file)
     for ch in text:
         font.assert_has(ch)
-        print("'{}' ok".format(ch))
+        if verbose:
+            print(f"'{ch}' ok")
 
-    padding = ghht.Padding(top=1, right=1, left=1)
+    xy_dates = list(
+        ghht.squares2commitdates(
+            start_year,
+            font.text2squares(text),
+            ghht.Padding(top=2, right=1, left=1),
+        )
+    )
 
-    def xy_dates():
-        for (x, y), td in ghht.squares2commitdates(start_year, font.text2squares(text), padding):
-            if td.date() in skip_dates:
-                continue
-            yield (x, y), td
-
-    if debug:
-        print("debug mode, will not generate commits")
-        print("x y date")
-        years = defaultdict(lambda: np.zeros(ghht.HeatMapCanvas.shape))
-        for (x, y), td in xy_dates():
-            print(x, y, td.date())
-            years[td.date().year][y][x] += 1
-        ghht.plot_debug_heatmap(sorted(years.items(), reverse=True))
+    if ascii:
+        if verbose:
+            print("ascii mode, will not generate commits")
+        for row in ghht.as_ascii_rows(xy_dates):
+            print(row)
         return
 
-    if not os.path.isdir(os.path.join(sink, ".git")):
-        print("'{}' does not have a .git directory, initializing repo".format(sink))
-        ghht.run("git init", sink)
+    if not os.path.isdir(os.path.join(git_repo, ".git")):
+        if verbose:
+            print(f"'{git_repo}' does not have a .git directory, initializing repo")
+        ghht.run("git init", git_repo)
 
-    print()
-    print("generating commits")
-    for (x, y), t in xy_dates():
+    if verbose:
+        print("generating commits")
+    for (x, y), t in xy_dates:
         for _ in range(intensity):
-            ghht.commit(t, sink, "({},{})".format(x, y))
+            ghht.commit(t, git_repo, f"({x},{y})")
 
     if background:
-        print()
-        print("generating commits for background")
-        ghht.commit_year(start_year, sink)
+        if verbose:
+            print("generating commits for background")
+        ghht.commit_year(start_year, git_repo)
 
 
 def main():
-    parser = ArgumentParser()
-    parser.add_argument("text",
+    parser = argparse.ArgumentParser(prog=ghht.__name__)
+    parser.add_argument(
+        "text",
         type=str,
-        help="ASCII text to render on commit heatmap.")
-    parser.add_argument("start_year",
+        help="Short ASCII text to render on commit heatmap.",
+    )
+    parser.add_argument(
+        "start_year",
         type=int,
-        help="Year for first commit.")
-    parser.add_argument("--sink",
+        help="Year for first commit.",
+    )
+    parser.add_argument(
+        "--git-repo",
         type=str,
-        help="Path to a git repository to be used for generating commits.")
-    parser.add_argument("--font-file",
+        help="Path to a git repository or directory (runs git init automatically if there's no .git dir) to be used for generating commits.",
+    )
+    parser.add_argument(
+        "--font-file",
         type=str,
         default=ghht.DEFAULT_FONT,
-        help="TTX-convertible font file.")
-    parser.add_argument("--background",
+        help="TTX-convertible font file.",
+    )
+    parser.add_argument(
+        "--background",
         action="store_true",
         default=False,
-        help="Generate a single commit on every day to paint a background.")
-    parser.add_argument("--debug",
+        help="Generate a single commit on every day to paint a background.",
+    )
+    parser.add_argument(
+        "--ascii",
         action="store_true",
         default=False,
-        help="Plot characters with matplotlib instead of generating commits.")
-    parser.add_argument("--intensity",
+        help="Print results to stdout instead of generating commits.",
+    )
+    parser.add_argument(
+        "--intensity",
         type=int,
         default=1,
-        help="How many commits to generate for every text square.")
-    parser.add_argument("--skip-list",
-        type=str,
-        help="Path to a file containing lines of yyyy-mm-dd for dates that should not have a commit.")
-
-    _main(**vars(parser.parse_args()))
+        help="How many commits to generate for every text square.",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+    )
+    run_ghht(**vars(parser.parse_args()))
 
 
 if __name__ == "__main__":
