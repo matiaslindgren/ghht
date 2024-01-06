@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="ghht",
-    version="0.3.2",
+    version="0.4.0",
     install_requires=[
         "fonttools ~= 4.18.0",
     ],
