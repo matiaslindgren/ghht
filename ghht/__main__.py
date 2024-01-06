@@ -10,21 +10,17 @@ import fontTools.ttx
 import ghht
 
 
-def parse_date(d):
-    return datetime.datetime.strptime(d, "%Y-%m-%d")
-
-
 def run_ghht(
-    git_repo,
     text,
     start_year,
-    font_file,
-    background,
-    intensity,
+    git_repo,
     ascii,
+    font_file,
+    intensity,
     verbose,
 ):
-    assert git_repo or ascii, "specify either --git-repo or --ascii"
+    assert bool(git_repo) != ascii, "specify either --git-repo or --ascii, not both"
+
     ttx_file = tempfile.mkstemp()[1] + ".ttx"
     if verbose:
         print(f"converting font file '{font_file:s}' to '{ttx_file:s}'")
@@ -68,11 +64,6 @@ def run_ghht(
         for _ in range(intensity):
             ghht.commit(t, git_repo, f"({x},{y})")
 
-    if background:
-        if verbose:
-            print("generating commits for background")
-        ghht.commit_year(start_year, git_repo)
-
 
 def main():
     parser = argparse.ArgumentParser(prog=ghht.__name__)
@@ -92,22 +83,16 @@ def main():
         help="Path to a git repository or directory (runs git init automatically if there's no .git dir) to be used for generating commits.",
     )
     parser.add_argument(
-        "--font-file",
-        type=str,
-        default=ghht.DEFAULT_FONT,
-        help="TTX-convertible font file.",
-    )
-    parser.add_argument(
-        "--background",
-        action="store_true",
-        default=False,
-        help="Generate a single commit on every day to paint a background.",
-    )
-    parser.add_argument(
         "--ascii",
         action="store_true",
         default=False,
         help="Print results to stdout instead of generating commits.",
+    )
+    parser.add_argument(
+        "--font-file",
+        type=str,
+        default=ghht.DEFAULT_FONT,
+        help="TTX-convertible font file.",
     )
     parser.add_argument(
         "--intensity",
