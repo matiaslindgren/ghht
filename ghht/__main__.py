@@ -60,7 +60,7 @@ def run_ghht(
     if not os.path.isdir(os.path.join(git_repo, ".git")):
         if verbose:
             print(f"'{git_repo}' does not have a .git directory, initializing repo")
-        ghht.run("git init", git_repo)
+        ghht.sys_run("git init", git_repo)
 
     if verbose:
         print("generating commits")
