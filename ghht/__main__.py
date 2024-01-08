@@ -108,8 +108,8 @@ def main():
         "--verbose",
         action="store_true",
     )
-    run_ghht(**vars(parser.parse_args()))
+    return run_ghht(**vars(parser.parse_args()))
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
