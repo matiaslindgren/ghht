@@ -21,6 +21,9 @@ def run_ghht(
 ):
     assert bool(git_repo) != ascii, "specify either --git-repo or --ascii, not both"
 
+    if not os.path.exists(font_file):
+        print(f"font path does not exist: '{font_file}'")
+        return 1
     ttx_file = tempfile.mkstemp()[1] + ".ttx"
     if verbose:
         print(f"converting font file '{font_file:s}' to '{ttx_file:s}'")
