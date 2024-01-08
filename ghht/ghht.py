@@ -176,13 +176,10 @@ def sys_run(cmd, cwd):
 
 
 def commit(date, sink_repo, msg):
-    unix = round(date.timestamp())
-    outfile = "commits.txt"
-    outpath = os.path.join(sink_repo, outfile)
-    with open(outpath, "a") as outf:
-        print(unix, msg, file=outf)
-    sys_run(f"git add {outfile:s}", sink_repo)
-    sys_run(f"git commit --date={unix:d} --message={msg:s}", sink_repo)
+    sys_run(
+        f"git commit --allow-empty --date={round(date.timestamp()):d} --message={msg:s}",
+        sink_repo,
+    )
 
 
 def as_ascii_rows(xy_dates):
