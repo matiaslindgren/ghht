@@ -18,6 +18,8 @@ def run_ghht(
     font_file,
     intensity,
     verbose,
+    pad_top,
+    pad_left,
 ):
     assert bool(git_repo) != ascii, "specify either --git-repo or --ascii, not both"
 
@@ -45,7 +47,10 @@ def run_ghht(
         ghht.squares2commitdates(
             start_year,
             font.text2squares(text),
-            ghht.Padding(top=1, right=1, left=1),
+            ghht.Padding(
+                top=pad_top,
+                left=pad_left,
+            ),
         )
     )
 
@@ -102,6 +107,16 @@ def main():
         type=int,
         default=1,
         help="How many commits to generate for every text square.",
+    )
+    parser.add_argument(
+        "--pad-top",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "--pad-left",
+        type=int,
+        default=1,
     )
     parser.add_argument(
         "-v",

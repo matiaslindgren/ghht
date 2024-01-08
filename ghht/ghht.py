@@ -118,7 +118,7 @@ class TTF:
             yield self.charsize(ch), self.char2squares(ch)
 
 
-Padding = namedtuple("Padding", ("top", "right", "left"))
+Padding = namedtuple("Padding", ("top", "left"))
 
 
 class HeatMapCanvas:
@@ -152,7 +152,7 @@ class HeatMapCanvas:
         self.begin_date = begin
 
     def is_inside(self, x):
-        return x + self.dx + self.padding.left < self.weeks_delta - self.padding.right
+        return x + self.dx + self.padding.left < self.weeks_delta - 1
 
     def xy2date(self, x0, y0):
         x0, y0 = int(x0), int(y0)
