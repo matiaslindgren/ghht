@@ -5,6 +5,17 @@ import os
 import subprocess
 
 
+__all__ = (
+    "HeatMapCanvas",
+    "Padding",
+    "TTF",
+    "as_ascii_rows",
+    "commit",
+    "squares2commitdates",
+    "sys_run",
+)
+
+
 def interpolate(p1, p2):
     x1, y1 = p1
     x2, y2 = p2
@@ -53,7 +64,7 @@ def flood_fill(contour):
 
 
 class TTF:
-    def __init__(self, ttx_path, px_step=200, font_height=4):
+    def __init__(self, ttx_path, px_step=400, font_height=5):
         with open(ttx_path) as f:
             elem_tree = ElementTree(file=f)
         self.glyphs = elem_tree.find("glyf")

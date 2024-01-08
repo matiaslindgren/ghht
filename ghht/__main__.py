@@ -45,7 +45,7 @@ def run_ghht(
         ghht.squares2commitdates(
             start_year,
             font.text2squares(text),
-            ghht.Padding(top=2, right=1, left=1),
+            ghht.Padding(top=1, right=1, left=1),
         )
     )
 
@@ -94,7 +94,7 @@ def main():
     parser.add_argument(
         "--font-file",
         type=str,
-        default=ghht.DEFAULT_FONT,
+        default=os.path.join(ghht.__path__[0], "font", "cg-pixel-4x5-mono.ttf"),
         help="TTX-convertible font file.",
     )
     parser.add_argument(
