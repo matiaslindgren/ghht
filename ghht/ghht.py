@@ -27,9 +27,10 @@ def interpolate(p1, p2):
 
 
 def minmax_xy(points):
-    x_min = y_min = float("inf")
-    x_max = y_max = -float("inf")
-    for x, y in points:
+    points = list(points)
+    x_min = x_max = points[0][0]
+    y_min = y_max = points[0][1]
+    for x, y in points[1:]:
         x_min = min(x_min, x)
         x_max = max(x_max, x)
         y_min = min(y_min, y)
@@ -60,7 +61,7 @@ def flood_fill(contour):
         q.append((x + 1, y))
         q.append((x, y - 1))
         q.append((x, y + 1))
-    return sorted(visited if inside else not_contour - visited)
+    return visited if inside else not_contour - visited
 
 
 class TTF:
@@ -105,9 +106,10 @@ class TTF:
             for p1, p2 in zip(p, p[1:] + [p[0]]):
                 points.extend(interpolate(p1, p2))
                 points.pop()
-            points = set((x // 2, y // 2) for x, y in flood_fill(points))
-            # Invert y-axis
-            yield [(x, -y + self.font_height - 1) for x, y in points]
+            if points:
+                points = set((x // 2, y // 2) for x, y in flood_fill(points))
+                # Invert y-axis
+                yield [(x, -y + self.font_height - 1) for x, y in points]
 
     def assert_has(self, ch):
         assert self.glyph(ch) is not None, "font has no char '{}'".format(ch)

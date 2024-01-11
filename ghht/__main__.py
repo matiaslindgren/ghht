@@ -22,6 +22,8 @@ def run_ghht(
     pad_left,
 ):
     assert bool(git_repo) != ascii, "specify either --git-repo or --ascii, not both"
+    assert text, "input text cannot be empty"
+    assert start_year > 0, "start year must be positive"
 
     if not os.path.exists(font_file):
         print(f"font path does not exist: '{font_file}'")
@@ -74,7 +76,10 @@ def run_ghht(
 
 
 def main():
-    parser = argparse.ArgumentParser(prog=ghht.__name__)
+    parser = argparse.ArgumentParser(
+        prog=ghht.__name__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     parser.add_argument(
         "text",
         type=str,
@@ -112,16 +117,19 @@ def main():
         "--pad-top",
         type=int,
         default=1,
+        help="Amount of empty squares above the text.",
     )
     parser.add_argument(
         "--pad-left",
         type=int,
         default=1,
+        help="Amount of empty squares on the left side of text.",
     )
     parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
+        help="Print more information doing stuff",
     )
     return run_ghht(**vars(parser.parse_args()))
 
