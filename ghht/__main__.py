@@ -129,7 +129,7 @@ def main():
         "-v",
         "--verbose",
         action="store_true",
-        help="Print more information doing stuff",
+        help="Print more information",
     )
     return run_ghht(**vars(parser.parse_args()))
 

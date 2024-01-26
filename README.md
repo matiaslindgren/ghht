@@ -18,12 +18,12 @@ python3 -m ghht -h
 
 ### Git commits
 
-Create an empty directory and fill it with some commits:
+Create an empty directory (or use an existing git repo) and fill it with some commits:
 ```bash
 mkdir commit-sink
 python3 -m ghht "hello." 2015 --pad-left 8 --git-repo ./commit-sink
 ```
-Then create a repository on GitHub and push `commit-sink` there.
+Then push `commit-sink` to a repository on GitHub.
 
 ### ASCII output
 
