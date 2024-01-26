@@ -7,7 +7,7 @@ Pretend the green squares on GitHub heatmaps are pixels and "render" text on the
 ## Install
 
 ```bash
-python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.5.1.zip
+python3 -m pip install --user https://github.com/matiaslindgren/ghht/archive/v0.5.2.zip
 ```
 
 ## Examples
